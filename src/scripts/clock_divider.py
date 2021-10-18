@@ -1,7 +1,7 @@
 """
 Clock Divider
 author: awonak
-version: 1.1
+version: 1.2
 
 Provide 4 divisions of the master clock set by knob 1.
 
@@ -38,49 +38,66 @@ MAX_DIVISION = max(DIVISION_CHOICES)
 class ClockDivider:
 
     def __init__(self, clock: Clock):
-        self.selected_output = -1
-        self.previous_choice = int(knob_2.percent() * len(DIVISION_CHOICES) - 0.0001)
-        self.counter = 1
         self.clock = clock
 
         # Divisions corresponding to each digital output.
         self.divisions = [1, 2, 4, 8]
+
+        # Counters for each clock division (use a copy of the values, not the reference)
+        self.counters = self.divisions[:]
+
+        # Selects the Digital Jack to adjust clock division using 0-based index with an
+        # extra index to disable config controls.
+        self.selected_output = -1
+        self._previous_choice = knob_2.choice(len(DIVISION_CHOICES))
+
+    def trigger(self):
+        """Emit a trigger for each digital jack within this clock cycle."""
+        for i, pin in enumerate(digital_outputs):
+            self.counters[i] -= 1
+            if self.counters[i] == 0:
+                trigger(pin)
+                # Reset counter for this division
+                self.counters[i] = self.divisions[i]
+
+    def adjust_division(self):
+        """When a digital jack is selected, read division choice and update it's division."""
+        if self.selected_output >= 0:
+            choice = knob_2.choice(len(DIVISION_CHOICES))
+            if choice != self._previous_choice:
+                self.divisions[self.selected_output] = DIVISION_CHOICES[choice]
+                self.counters[self.selected_output] = DIVISION_CHOICES[choice]
+                self._previous_choice = choice
 
     async def start(self):
         # Register button handlers.
         @button_2.handler
         def config_divisions():
             self.selected_output = (self.selected_output + 1) % len(self.divisions)
-            
+
         # Start the main loop.
         while True:
             # Trigger the digital pin if it's divisible by the counter.
-            for i, pin in enumerate(digital_outputs):
-                if self.counter % self.divisions[i] == 0:
-                    trigger(pin)
+            self.trigger()
 
             # Set the currently selected digital out's clock division to the value
             # selected by knob 2.
-            choice = int((knob_2.percent() - 0.001) * len(DIVISION_CHOICES))
-            if self.selected_output >= 0 and choice != self.previous_choice:
-                self.divisions[self.selected_output] = DIVISION_CHOICES[choice]
-                self.previous_choice = choice
+            self.adjust_division()
 
-            # Wrap the counter if we've reached the largest division.
-            self.counter = (self.counter + 1) % MAX_DIVISION
-
-            if DEBUG:
-                msg = "DJ: {}  || config:{} tempo:{} wait: {}"
-                print(msg.format(self.divisions, self.selected_output, self.clock.tempo, self.clock.wait_ms()))
-            
+            self.debug()
             await asyncio.sleep_ms(self.clock.wait_ms())
+
+    def debug(self):
+        if DEBUG:
+            msg = 'DJ: {}  || Counters: {}  || config: {} || tempo: {} wait: {}'
+            print(msg.format(self.divisions, self.counters, self.selected_output, self.clock.tempo, self.clock.wait_ms()))
 
 
 # Run the script if called directly.
 if __name__ == '__main__':
     clock = Clock(knob_1)
     clock_divider = ClockDivider(clock)
-    
+
     # Main script function
     async def main():
         loop = asyncio.get_event_loop()

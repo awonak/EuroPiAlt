@@ -1,7 +1,7 @@
 """
 Turing Machine
 author: roryjamesallen, awonak
-version: 2.0
+version: 2.1
 
 Play a sequence that changes notes within a scale according to the probability set by knob 2.
 
@@ -94,7 +94,8 @@ class TuringMachine:
             else:
                 self.scale = scales[i]
             # Reset sequence to remove notes from previous scale.
-            self.sequence = []
+            self.step = 0
+            self.sequence = [TuringStep(self.scale)]
 
         @button_2.handler
         def push_lock():

@@ -14,8 +14,8 @@ from lib.europi import button_2
 from lib.europi import digital_outputs
 from lib.clock import Clock
 from lib.button import Pushbutton
-from lib.helpers import digital_off
 from lib.ui import display_choice
+from lib.ui import digital_off
 from lib.ui import loading_animation
 
 from scripts.arpeggiator import Arpeggiator

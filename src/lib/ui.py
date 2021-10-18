@@ -13,6 +13,12 @@ from utime import sleep_ms
 from lib.europi import DigitalOut, digital_outputs
 
 
+def digital_off() -> None:
+    """Turn all digital outputs off."""
+    for output in digital_outputs:
+        output.value(0)
+
+
 def display_choice(choice: int) -> str:
     """Display given choice as binary using the digital LEDs.
     

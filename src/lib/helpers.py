@@ -19,12 +19,6 @@ def randint16() -> int:
     return randint(0, UINT_16)
 
 
-def digital_off() -> None:
-    """Turn all digital outputs off."""
-    for output in digital_outputs:
-        output.value(0)
-
-
 def trigger(digital: DigitalOut, delay: int = 10) -> None:
     """Trigger a digital jack in a thread to avoid affecting tempo."""
     loop = asyncio.get_event_loop()
