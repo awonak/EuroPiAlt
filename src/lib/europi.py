@@ -12,12 +12,11 @@ https://github.com/roryjamesallen/EuroPi
 https://allensynthesis.co.uk/europi_assembly.html
 """
 from random import random
-from typing import Iterable
 
 from machine import Pin, PWM, ADC
 from utime import sleep_ms, ticks_ms
 
-from src.lib.constants import UINT_16
+from lib.constants import UINT_16
 
 
 # Disable power saving mode and switch to PWM mode.

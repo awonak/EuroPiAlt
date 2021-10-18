@@ -8,20 +8,20 @@ Hold both buttons for >1 second to stop script and return to the bootloader.
 from utime import sleep_ms
 import uasyncio as asyncio
 
-from src.lib.europi import knob_1
-from src.lib.europi import button_1
-from src.lib.europi import button_2
-from src.lib.europi import digital_outputs
-from src.lib.clock import Clock
-from src.lib.button import Pushbutton
-from src.lib.helpers import digital_off
-from src.lib.ui import display_choice
-from src.lib.ui import loading_animation
+from lib.europi import knob_1
+from lib.europi import button_1
+from lib.europi import button_2
+from lib.europi import digital_outputs
+from lib.clock import Clock
+from lib.button import Pushbutton
+from lib.helpers import digital_off
+from lib.ui import display_choice
+from lib.ui import loading_animation
 
-from src.scripts.arpeggiator import Arpeggiator
-from src.scripts.clock_divider import ClockDivider
-from src.scripts.sequencer import Sequencer
-from src.scripts.turing_machine import TuringMachine
+from scripts.arpeggiator import Arpeggiator
+from scripts.clock_divider import ClockDivider
+from scripts.sequencer import Sequencer
+from scripts.turing_machine import TuringMachine
 
 
 # Initialize a Clock for the sequencer.
@@ -29,7 +29,7 @@ from src.scripts.turing_machine import TuringMachine
 #              clock_bus = digital_in,
 #              clock_switch = digital_sw)  # Use this with external clock source.
 # Use this clock config when no external EuroPi clock present.
-clock = Clock(knob_1)  
+clock = Clock(knob_1)
 
 
 # Register each script individually in the scripts list.

@@ -42,7 +42,7 @@ TODO: allow external clock source to receive clock and pass-through.
 from machine import Pin
 from utime import sleep_ms
 
-from europi import Button, Knob
+from lib.europi import Button, Knob
 
 
 class Clock:
@@ -53,7 +53,8 @@ class Clock:
                  clock_bus: Pin = None,
                  min_bpm: int = 20,
                  max_bpm: int = 280,
-                 internal_clock: bool = True) -> None:
+                 internal_clock: bool = True,
+                 avg_run_len: int = 1) -> None:
         # Default clock source.
         self._internal_clock = internal_clock
 
@@ -71,34 +72,36 @@ class Clock:
         # Tempo range vars
         self.min_bpm = min_bpm
         self.max_bpm = max_bpm
-        self.tempo = 120
 
         # Running average vars for smoothing analog input for tempo.
-        self._run_len = 10
-        self._run = [self.tempo] * self._run_len
+        self._run_len = avg_run_len
+        self._run = [120] * self._run_len
 
     def switch_clock_source(self) -> None:
         """Switch between internal and external clock source."""
         self._internal_clock = not self._internal_clock
     
-    def get_internal_tempo(self) -> float:
+    @property
+    def tempo(self) -> float:
         """Take a reading from the tempo knob to determine internal tempo."""
         # Set the clock speed via Knob 1.
         # tempo range default is between 20 and 280 BPM.
         # Knob 12 o'clock position is 150 BPM.
-        return (self.tempo_knob.percent() * (self.max_bpm - self.min_bpm)) + self.min_bpm
-    
+        _tempo =  (self.tempo_knob.percent() * (self.max_bpm - self.min_bpm)) + self.min_bpm
+        if self._run_len == 1:
+            return round(_tempo, 1)
+        else:
+            # Get the running average tempo.
+            self._run = self._run[1:]
+            self._run.append(_tempo)
+            return round(sum(self._run) / self._run_len, 1)
+
     def wait_ms(self) -> int:
         """The duration of a quarter note in ms for the current tempo."""
-        return int(((60 / self.tempo) / 4) / 1000)
+        return int(((60 / self.tempo) / 4) * 1000)
 
     def internal_clock_wait(self) -> None:
         """Wait for a quarter note of the internal tempo."""
-        # Get the running average tempo.
-        self._run = self._run[1:]
-        self._run.append(self.get_internal_tempo())
-        self.tempo = round(sum(self._run) / self._run_len, 1)
-        # Sleep for a quarter note of the tempo.
         sleep_ms(self.wait_ms())
         # Send clock pulse to clock bus.
         #if self.clock_bus:

@@ -10,7 +10,7 @@ from random import choice, randint
 
 from utime import sleep_ms
 
-from src.lib.europi import DigitalOut, digital_outputs
+from lib.europi import DigitalOut, digital_outputs
 
 
 def display_choice(choice: int) -> str:
@@ -48,7 +48,7 @@ def sparkle_animation(count: int = 30) -> None:
         sleep_ms(randint(30, 70))
 
 
-def _blink(d: DigitalOut, ms: int):
+def _blink(d: DigitalOut, ms: int = 50) -> None:
     d.value(1)
     sleep_ms(ms)
     d.value(0)

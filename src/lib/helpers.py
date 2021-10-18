@@ -7,8 +7,8 @@ from time import sleep
 
 import uasyncio as asyncio
 
-from src.lib.constants import UINT_16
-from src.lib.europi import DigitalOut, digital_outputs
+from lib.constants import UINT_16
+from lib.europi import DigitalOut, digital_outputs
 
 
 def random_chance(percentage: float) -> bool:
@@ -25,13 +25,13 @@ def digital_off() -> None:
         output.value(0)
 
 
-def blink(digital: DigitalOut, delay: int) -> None:
-    """Blink a digital jack in a thread to avoid affecting tempo."""
+def trigger(digital: DigitalOut, delay: int = 10) -> None:
+    """Trigger a digital jack in a thread to avoid affecting tempo."""
     loop = asyncio.get_event_loop()
-    loop.create_task(_blink(digital, delay))
+    loop.create_task(_trigger(digital, delay))
 
 
-async def _blink(digital: DigitalOut, delay: int) -> None:
+async def _trigger(digital: DigitalOut, delay: int) -> None:
     digital.value(1)
     await asyncio.sleep_ms(delay)
     digital.value(0)

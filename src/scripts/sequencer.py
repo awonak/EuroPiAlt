@@ -37,16 +37,16 @@ digital_1: step trigger
 import uasyncio as asyncio
 
 # User libraries
-from src.lib.button import Pushbutton
-from src.lib.clock import Clock
-from src.lib.europi import Knob, knob_1
-from src.lib.europi import knob_2
-from src.lib.europi import button_1
-from src.lib.europi import button_2
-from src.lib.europi import digital_outputs
-from src.lib.europi import analog_outputs
-from src.lib.helpers import blink
-from src.lib.scales import chromatic_scale
+from lib.button import Pushbutton
+from lib.clock import Clock
+from lib.europi import Knob, knob_1
+from lib.europi import knob_2
+from lib.europi import button_1
+from lib.europi import button_2
+from lib.europi import digital_outputs
+from lib.europi import analog_outputs
+from lib.helpers import trigger
+from lib.scales import chromatic_scale
 
 
 DEBUG = False
@@ -137,7 +137,7 @@ class Sequencer:
         analog_outputs[2].value(self.pitch[1][self.counter])
         analog_outputs[3].value(self.pitch[3][self.counter])
         # Trigger digital 1
-        blink(digital_outputs[0], 10)
+        trigger(digital_outputs[0], 10)
         self.debug()
 
     def next_step(self):
@@ -146,9 +146,9 @@ class Sequencer:
         if self.edit:           
             if self.counter == 0:
                 # Longer blink to indicate pattern start.
-                blink(digital_outputs[1], 500)
+                trigger(digital_outputs[1], 500)
             else:
-                blink(digital_outputs[1], 10)
+                trigger(digital_outputs[1], 10)
         self.debug()
     
     def debug(self):
@@ -188,14 +188,13 @@ class Sequencer:
         while True:
             # Play sequence
             if self.run:
-                self.clock.wait()
                 self.play_step()
                 self.next_step()
             # Edit sequence
             elif self.edit:
                 self.adjust_step()
 
-            await asyncio.sleep_ms(0)
+            await asyncio.sleep_ms(self.clock.wait_ms())
 
 
 if __name__ == '__main__':

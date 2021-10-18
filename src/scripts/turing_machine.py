@@ -1,7 +1,7 @@
 """
 Turing Machine
-author: roryjamesallen
-version: 1.1
+author: roryjamesallen, awonak
+version: 2.0
 
 Play a sequence that changes notes within a scale according to the probability set by knob 2.
 
@@ -15,7 +15,7 @@ when the sequence restarts.
 
 knob_1: set master clock tempo
 knob_2: set new note chance
-button_1: introduce a new note
+button_1: change quantized pitch scale
 button_2: lock sequence
 analogue_1: 1V/Oct pitch or timbre control
 analogue_2: 1V/Oct pitch or timbre control
@@ -27,20 +27,24 @@ digital_3: note changed
 digital_4: sequence reset
 """
 from random import choice
+from scripts.arpeggiator import DEBUG
 
 import uasyncio as asyncio
 
-from src.lib.clock import Clock
-from src.lib.europi import button_1
-from src.lib.europi import button_2
-from src.lib.europi import knob_1
-from src.lib.europi import knob_2
-from src.lib.europi import digital_outputs
-from src.lib.europi import analog_outputs
-from src.lib.helpers import blink
-from src.lib.helpers import randint16
-from src.lib.helpers import random_chance
-from src.lib.scales import Scale, scales
+from lib.clock import Clock
+from lib.europi import button_1
+from lib.europi import button_2
+from lib.europi import knob_1
+from lib.europi import knob_2
+from lib.europi import digital_outputs
+from lib.europi import analog_outputs
+from lib.helpers import trigger
+from lib.helpers import randint16
+from lib.helpers import random_chance
+from lib.scales import Scale, scales
+
+
+DEBUG = False
 
 
 class TuringStep:
@@ -48,9 +52,12 @@ class TuringStep:
     pitch2: int
 
     def __init__(self, scale: Scale):
-        self.pitch_1 = choice(scale)
-        self.pitch_2 = choice(scale)
-    
+        self.pitch_1 = choice(scale.notes)
+        self.pitch_2 = choice(scale.notes)
+
+    def __repr__(self):
+        return "<TuringStep  pitch_1: {}, pitch_2: {}>".format(self.pitch_1, self.pitch_2)
+
     def play(self, step_duration: int):
         # Play quantized pitch on Analog 1 & 2.
         analog_outputs[0].value(self.pitch_1)
@@ -59,10 +66,10 @@ class TuringStep:
         # Play random notes on Analog 3 & 4.
         analog_outputs[2].value(randint16())
         analog_outputs[3].value(randint16())
-        
+
         #The gate is turned on as this is 'open' the whole time the note is active
-        blink(digital_outputs[0], 50)
-        blink(digital_outputs[1], step_duration - 10)
+        trigger(digital_outputs[0])
+        trigger(digital_outputs[1], step_duration - 10)
 
 
 class TuringMachine:
@@ -79,51 +86,54 @@ class TuringMachine:
     async def start(self):
         # Register button handlers.
         @button_1.handler
-        def push_new_note(self):
-            self.sequence[self.step] = new_note
-            digital_outputs[2].value(1)
+        def push_change_scale():
+            # Cycle to next scale.
+            i = scales.index(self.scale) + 1
+            if i == len(scales):
+                self.scale = scales[0]
+            else:
+                self.scale = scales[i]
+            # Reset sequence to remove notes from previous scale.
+            self.sequence = []
 
         @button_2.handler
-        def push_lock(self):
+        def push_lock():
             self.lock = not self.lock
 
+        # Increment sequence step, or cycle back to the beginning.
         while True:
-            # The sequence has started again, so the reset indicator is turned off.
-            digital_outputs[3].value(0)
-            new_note = TuringStep(self.scale)
-
             # The new note can only be swapped out if the sequence has reached its final length, so not for the first x steps.
-            if len(self.sequence) == self.sequence_length: 
+            if len(self.sequence) == self.sequence_length:
                 # The note is then dependent on the random chance controlled by knob 2
-                if random_chance(knob_2.percent()): 
+                if random_chance(knob_2.percent()):
                     if self.lock == False:
-                        self.sequence[self.step] = new_note
-                        # The jack to indicate a new note has been added is turned on
-                        digital_outputs[2].value(1)
+                        self.sequence[self.step] = TuringStep(self.scale)
+                        # The jack to indicate a new note has been added is turned on.
+                        trigger(digital_outputs[2])
             # If the sequence hasn't yet reached its full length, the note is added to the end.
             else:
-                self.sequence.append(new_note)
-            
+                self.sequence.append(TuringStep(self.scale))
+
             # Play the current step.
-            self.sequence[self.step].play(self.clock.wait_ms)
-            
-            # The jack to indicate a new note is turned off as the note is over
-            digital_outputs[2].value(0)
-            
+            self.sequence[self.step].play(self.clock.wait_ms())
+
+            if DEBUG:
+                print("step: {} note: {}".format(self.step, self.sequence[self.step]))
+
+            # Increment or cycle step.
             self.step += 1
             if self.step == self.sequence_length:
                 self.step = 0
-                digital_outputs[3].value(1)
+                trigger(digital_outputs[3])
 
-            self.clock.wait()
-
+            await asyncio.sleep_ms(self.clock.wait_ms())
 
 
 # Run the script if called directly.
 if __name__ == '__main__':
     clock = Clock(knob_1)
     turing = TuringMachine(clock)
-    
+
     # Main script function
     async def main():
         loop = asyncio.get_event_loop()

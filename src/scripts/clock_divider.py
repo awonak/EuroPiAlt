@@ -20,12 +20,12 @@ digital_4: fourth division, default /8
 """
 import uasyncio as asyncio
 
-from src.lib.europi import knob_1
-from src.lib.europi import knob_2
-from src.lib.europi import button_2
-from src.lib.europi import digital_outputs
-from src.lib.clock import Clock
-from src.lib.helpers import blink
+from lib.europi import knob_1
+from lib.europi import knob_2
+from lib.europi import button_2
+from lib.europi import digital_outputs
+from lib.clock import Clock
+from lib.helpers import trigger
 
 
 DEBUG = False
@@ -37,7 +37,7 @@ MAX_DIVISION = max(DIVISION_CHOICES)
 
 class ClockDivider:
 
-    def __init__(self, clock):
+    def __init__(self, clock: Clock):
         self.selected_output = -1
         self.previous_choice = int(knob_2.percent() * len(DIVISION_CHOICES) - 0.0001)
         self.counter = 1
@@ -54,15 +54,10 @@ class ClockDivider:
             
         # Start the main loop.
         while True:
-            # Set the clock speed via Knob 1.
-            # tempo range will be between 20 and 280 BPM.
-            # Knob 12 o'clock position is 150 BPM.
-            self.clock.wait()
-
             # Trigger the digital pin if it's divisible by the counter.
             for i, pin in enumerate(digital_outputs):
                 if self.counter % self.divisions[i] == 0:
-                    blink(pin, 50)
+                    trigger(pin)
 
             # Set the currently selected digital out's clock division to the value
             # selected by knob 2.
@@ -75,10 +70,10 @@ class ClockDivider:
             self.counter = (self.counter + 1) % MAX_DIVISION
 
             if DEBUG:
-                msg = "DJ: {}  || config:{}  tempo:{}"
-                print(msg.format(self.divisions, self.selected_output, self.clock.tempo))
+                msg = "DJ: {}  || config:{} tempo:{} wait: {}"
+                print(msg.format(self.divisions, self.selected_output, self.clock.tempo, self.clock.wait_ms()))
             
-            await asyncio.sleep(0)
+            await asyncio.sleep_ms(self.clock.wait_ms())
 
 
 # Run the script if called directly.

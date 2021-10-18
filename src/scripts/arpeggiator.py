@@ -3,7 +3,7 @@ Arpeggiator
 author: awonak
 version: 2.1
 
-Cycle through a sequence of notes in a scale.
+
 
 Master tempo is set by knob 1, each analog output has a diffent cycle pattern
 and each digital output triggers a different rhythmic pattern based off the
@@ -21,18 +21,20 @@ digital_2: trigger at cycle start
 digital_3: trigger at sequence step divided by 3
 digital_4: trigger at sequence step divided by 4
 """
+
 from random import choice
 
 import uasyncio as asyncio
 from utime import sleep_ms
 
-from src.lib.europi import knob_1
-from src.lib.europi import knob_2
-from src.lib.europi import button_1
-from src.lib.europi import analog_outputs
-from src.lib.europi import digital_outputs
-from src.lib.clock import Clock
-from src.lib.scales import scales
+from lib.clock import Clock
+from lib.europi import knob_1
+from lib.europi import knob_2
+from lib.europi import button_1
+from lib.europi import analog_outputs
+from lib.europi import digital_outputs
+from lib.helpers import trigger
+from lib.scales import scales
 
 
 DEBUG = False
@@ -55,27 +57,31 @@ class Arpeggiator:
         """Get the current selected octave range."""
         return knob_2.choice(self.OCTAVE_RANGE) + 1
 
-    # Restart the scale sequence.
     def restart(self, octave_range: int) -> None:
+        """Restart the scale sequence."""
         self.octave_range = octave_range
         self.step = 0
         self.bi_forward = True
 
-    # Proceed to the next step in the scale sequence.
     def next_step(self) -> bool:
-        if self.step + 1 == len(self):
+        """Proceed to the next step in the scale sequence."""
+        if self.step + 1 == self.scale_len():
             self.step = 0
             self.bi_forward = not self.bi_forward
         else:
             self.step += 1
         return True
+    
+    def scale_len(self) -> int:
+        """Returns the step count of the current scale."""
+        return self.scale.step_count(self.octave_range)
 
-    # Calculate the current note for each arpeggio pattern.
     def play(self) -> tuple(int):
-        fwd = self.notes[self.step]
-        bwd = self.notes[0 : self.scale.step_count(self.octave_range)][0 - self.step - 1]
+        """Calculate the current note for each arpeggio pattern."""
+        fwd = self.scale.notes[self.step]
+        bwd = self.scale.notes[0 : self.scale_len()][0 - self.step - 1]
         bi = fwd if self.bi_forward else bwd
-        rnd = choice(self.notes[0 : len(self)])
+        rnd = choice(self.scale.notes[0 : self.scale_len()])
         return fwd, bwd, bi, rnd
 
     async def start(self):
@@ -102,27 +108,21 @@ class Arpeggiator:
             analog_outputs[3].value(rnd)
 
             # Activate triggers for this scale sequence step.
-            digital_outputs[0].value(1)
+            trigger(digital_outputs[0])
             if self.step == 0:
-                digital_outputs[1].value(1)
+                trigger(digital_outputs[1])
             if self.step % 3 == 0:
-                digital_outputs[2].value(1)
+                trigger(digital_outputs[2])
             if self.step % 4 == 0:
-                digital_outputs[3].value(1)
-
-            # Sleep for standard trigger duration and turn off all digital outs.
-            sleep_ms(50)
-            [pin.value(0) for pin in digital_outputs]
-
-            self.clock.wait()
+                trigger(digital_outputs[3])
 
             if DEBUG:
-                msg = "{:>2}) A[1:{:>6} 2:{:>6} 3:{:>6} 4:{:>6}] scale:{:>2} octaves:{:>2}".format(
-                    self.step, fwd, bwd, bi, rnd, scales.index(self.scale), octave_range
+                msg = "{:>2}) A[1:{:>6} 2:{:>6} 3:{:>6} 4:{:>6}] scale:{:>2} octaves:{:>2} tempo: {}".format(
+                    self.step, fwd, bwd, bi, rnd, scales.index(self.scale), octave_range, self.clock.tempo
                 )
                 print(msg)
 
-            await asyncio.sleep_ms(0)
+            await asyncio.sleep_ms(self.clock.wait_ms())
 
 
 if __name__ == '__main__':

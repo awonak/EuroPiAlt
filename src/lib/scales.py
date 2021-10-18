@@ -10,13 +10,16 @@ that musical scale. The class also provides convenience methods for playing
 the scale in several ways.
 
 """
-from src.lib.constants import CHROMATIC_STEP
+from lib.constants import CHROMATIC_STEP
 
 
 class Scale:
     """A series of notes in a scale and its sequence state."""
 
     OCTAVE_RANGE = 3
+
+    notes: list(int)
+    include_octave: bool
 
     def __init__(self, notes: tuple(int), include_octave: bool = False) -> None:
         if include_octave:
