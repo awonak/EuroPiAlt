@@ -69,7 +69,7 @@ class TuringStep:
 
         #The gate is turned on as this is 'open' the whole time the note is active
         trigger(digital_outputs[0])
-        trigger(digital_outputs[1], step_duration - 10)
+        trigger(digital_outputs[1], step_duration - 20)
 
 
 class TuringMachine:
