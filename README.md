@@ -15,16 +15,18 @@ To add a new script, start by adding your Python file to the [scripts](src/scrip
 Your script must be a class for handling script state and logic, and must contain an async method called `start`.
 The `start` method should register your button handlers, enter the main loop, and call `await asyncio.sleep_ms`.
 
-    class MyScript:
-        ...
+```python
+class MyScript:
+    ...
 
-        async def start(self):
-            # Register the button handlers and module state.
+    async def start(self):
+        # Register the button handlers and module state.
+        ...
+        # Start the main loop.
+        while True:
             ...
-            # Start the main loop.
-            while True:
-                ...
-                await asyncio.sleep_ms(...)
+            await asyncio.sleep_ms(...)
+```
 
 Once you have created and tested your script, you can add it to the bootloader script list [here](src/bootloader.py#L36).
 
