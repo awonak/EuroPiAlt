@@ -2,7 +2,6 @@
 
 Alternate firmware for EuroPi designed with reusable components and a bootloader for switching scripts loaded onto the module.
 
-
 ## Firmware
 
 ### Bootloader
@@ -38,6 +37,7 @@ Once you have created and tested your script, you can add it to the bootloader s
 | ○○○●    | Clock Divider    | Provide 4 divisions of the master clock set by knob 1. |
 | ○○●○    | Sequencer    | 4 channels sequencer with 8 programmable steps of quantized pitch. |
 | ○○●●    | Turing Machine    | Play a sequence that changes notes within a scale according to the probability set by knob 2. |
+| ○●○○    | Smooth Random Voltage    | Random cv with adjustable slew rate. |
 
 
 ## Transferring scripts using rshell
