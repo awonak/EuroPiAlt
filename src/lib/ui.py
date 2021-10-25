@@ -29,9 +29,7 @@ def display_choice(choice: int) -> str:
         raise ValueError("choice must be between 0 and 15")
     # Convert the choice into 4 bit binary used to show choice in the 4
     # digital out LEDs.
-    b = bin(choice).replace('0b', '')
-    while len(b) < 4:
-        b = "0" + b
+    b = '{:04b}'.format(choice)
     # Convert each positional binary value into corresponding digital output
     # LED value.
     for i, output in enumerate(digital_outputs):

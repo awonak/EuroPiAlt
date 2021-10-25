@@ -107,7 +107,6 @@ class Clock:
         #if self.clock_bus:
         #    self.clock_bus.value(1); sleep_ms(10); self.clock_bus.value(0)
 
-    
     def external_clock_wait(self) -> None:
         """Wait for clock pulse to go high to advance."""
         while not self._internal_clock:
