@@ -60,10 +60,10 @@ class Clock:
 
         # Input controls for internal clock.
         self.tempo_knob = tempo_knob
+        self.clock_switch = clock_switch
         if clock_switch is not None:
             clock_switch.handler(self.switch_clock_source)
-            # Internal clock if plug not present
-            self._internal_clock = not clock_switch.value()
+            self.switch_clock_source()
 
         # GPIO Pin for clock bus, either external clock source or pass internal clock.
         self.clock_bus = clock_bus
@@ -79,7 +79,7 @@ class Clock:
 
     def switch_clock_source(self) -> None:
         """Switch between internal and external clock source."""
-        self._internal_clock = not self._internal_clock
+        self._internal_clock = not bool(self.clock_switch.value())
     
     @property
     def tempo(self) -> float:
