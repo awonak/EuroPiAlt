@@ -23,6 +23,8 @@ from scripts.clock_divider import ClockDivider
 from scripts.sequencer import Sequencer
 from scripts.turing_machine import TuringMachine
 from scripts.smooth_random_voltages import SmoothRandomVoltages
+from scripts.euclidean_rhythm import EuclideanRhythm
+
 
 # Initialize a Clock for the sequencer.
 #clock = Clock(tempo_knob = knob_1,
@@ -39,6 +41,7 @@ scripts = [
     Sequencer(clock),
     TuringMachine(clock),
     SmoothRandomVoltages(clock),
+    EuclideanRhythm(clock),
 ]
 SCRIPT_COUNT = len(scripts)
 

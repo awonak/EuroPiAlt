@@ -77,6 +77,13 @@ class Clock:
         self._run_len = avg_run_len
         self._run = [120] * self._run_len
 
+        # Enable/disable ability to change tempo.
+        self.disable_edit = False
+    
+    def toggle_edit(self):
+        """Enable/disable ability to change tempo."""
+        self.disable_edit = not self.disable_edit
+
     def switch_clock_source(self) -> None:
         """Switch between internal and external clock source."""
         self._internal_clock = not bool(self.clock_switch.value())
@@ -84,17 +91,17 @@ class Clock:
     @property
     def tempo(self) -> float:
         """Take a reading from the tempo knob to determine internal tempo."""
+        # Return current tempo if edit mode disabled:
+        if self.disable_edit:
+            return round(sum(self._run) / self._run_len, 1)
         # Set the clock speed via Knob 1.
         # tempo range default is between 20 and 280 BPM.
         # Knob 12 o'clock position is 150 BPM.
         _tempo =  (self.tempo_knob.percent() * (self.max_bpm - self.min_bpm)) + self.min_bpm
-        if self._run_len == 1:
-            return round(_tempo, 1)
-        else:
-            # Get the running average tempo.
-            self._run = self._run[1:]
-            self._run.append(_tempo)
-            return round(sum(self._run) / self._run_len, 1)
+        # Get the running average tempo.
+        self._run = self._run[1:]
+        self._run.append(_tempo)
+        return round(sum(self._run) / self._run_len, 1)
 
     def wait_ms(self) -> int:
         """The duration of a quarter note in ms for the current tempo."""
