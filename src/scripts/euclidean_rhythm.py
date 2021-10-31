@@ -93,6 +93,8 @@ class EuclideanRhythm:
         ]
         self._selected_pattern = 0
         self._pattern_mode = False
+        self._previous_steps = 1
+        self._previous_pulses = 0
 
     def _short1(self):
         """Toggle between tempo/pattern edit modes."""
@@ -115,8 +117,10 @@ class EuclideanRhythm:
             _steps = knob_1.choice(self.MAX_STEPS) + 1
             _pulses = knob_2.choice(_steps) + 1
             p = self.patterns[self._selected_pattern]
-            if _steps != p.steps or _pulses != p.pulses:
+            if _steps != self._previous_steps or _pulses != self._previous_pulses:
                 self.patterns[self._selected_pattern] = Pattern(p.out, _steps, _pulses)
+                self._previous_steps = _steps
+                self._previous_pulses = _pulses
 
     async def start(self):
         # Register button handlers.
@@ -131,7 +135,7 @@ class EuclideanRhythm:
             # Check knob state and update the current pattern.
             self.update()
 
-            # Trigger each pattern on high step.
+            # Trigger each pattern with high step.
             for pattern in self.patterns:
                 pattern.play_step()
 
