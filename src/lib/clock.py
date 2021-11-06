@@ -79,10 +79,13 @@ class Clock:
 
         # Enable/disable ability to change tempo.
         self.disable_edit = False
-    
-    def toggle_edit(self):
+
+    def toggle_edit(self, state=None):
         """Enable/disable ability to change tempo."""
-        self.disable_edit = not self.disable_edit
+        if state is not None:
+            self.disable_edit = not state  # fixme
+        else:
+            self.disable_edit = not self.disable_edit
 
     def switch_clock_source(self) -> None:
         """Switch between internal and external clock source."""
