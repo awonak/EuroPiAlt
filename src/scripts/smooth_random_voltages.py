@@ -22,7 +22,7 @@ analog_1: smooth random voltage
 analog_2: stepped random voltage
 digital_1: Trigger on new voltage
 digital_2: Trigger on slew reached target volatge
-digital_3: (state display) off when clocked, on when unclocked
+digital_3: (state display) on when clocked, off when unclocked
 """
 from random import randint
 from scripts.arpeggiator import DEBUG
@@ -51,6 +51,7 @@ class SmoothRandomVoltages:
     def __init__(self, clock: Clock):
         self.clock = clock
         self.clocked = True
+        digital_3.value(1)
         self.slew_rate = lambda: 1 << knob_2.choice(14) + 1
 
         self.voltage = 0
