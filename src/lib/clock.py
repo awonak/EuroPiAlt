@@ -44,6 +44,9 @@ from utime import sleep_ms
 
 from lib.europi import Button, Knob
 
+MIN_BPM = 20
+MAX_BPM = 280
+
 
 class Clock:
     """Define a master clock either using internal or external source."""
@@ -51,12 +54,14 @@ class Clock:
     def __init__(self, tempo_knob: Knob,
                  clock_switch: Button = None,
                  clock_bus: Pin = None,
-                 min_bpm: int = 20,
-                 max_bpm: int = 280,
+                 min_bpm: int = MIN_BPM,
+                 max_bpm: int = MAX_BPM,
                  internal_clock: bool = True,
                  avg_run_len: int = 1) -> None:
         # Default clock source.
         self._internal_clock = internal_clock
+        # Enable/disable ability to change tempo.
+        self.edit_mode = True
 
         # Input controls for internal clock.
         self.tempo_knob = tempo_knob
@@ -77,15 +82,12 @@ class Clock:
         self._run_len = avg_run_len
         self._run = [120] * self._run_len
 
-        # Enable/disable ability to change tempo.
-        self.disable_edit = False
-
-    def toggle_edit(self, state=None):
+    def toggle_edit(self, enabled=None):
         """Enable/disable ability to change tempo."""
-        if state is not None:
-            self.disable_edit = not state  # fixme
+        if enabled is not None:
+            self.edit_mode = enabled
         else:
-            self.disable_edit = not self.disable_edit
+            self.edit_mode = not self.edit_mode
 
     def switch_clock_source(self) -> None:
         """Switch between internal and external clock source."""
@@ -95,7 +97,7 @@ class Clock:
     def tempo(self) -> float:
         """Take a reading from the tempo knob to determine internal tempo."""
         # Return current tempo if edit mode disabled:
-        if self.disable_edit:
+        if not self.edit_mode:
             return round(sum(self._run) / self._run_len, 1)
         # Set the clock speed via Knob 1.
         # tempo range default is between 20 and 280 BPM.
