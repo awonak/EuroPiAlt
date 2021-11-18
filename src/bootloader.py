@@ -100,5 +100,7 @@ def bootloader():
                 # Reset button handlers
                 button_1.reset_handler()
                 button_2.reset_handler()
+                # Enable clock in case it's disabled
+                clock.toggle_edit(True)
 
         sleep_ms(100)

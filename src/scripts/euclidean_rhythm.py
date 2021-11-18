@@ -86,7 +86,7 @@ class EuclideanRhythm:
     def __init__(self, clock: Clock):
         self.clock = clock
         self.patterns = [
-            Pattern(digital_1, 8, 5),
+            Pattern(digital_1, 8, 4),
             Pattern(digital_2, 1, 0),
             Pattern(digital_3, 1, 0),
             Pattern(digital_4, 1, 0),
@@ -125,7 +125,7 @@ class EuclideanRhythm:
     async def start(self):
         # Register button handlers.
         Pushbutton(button_1.pin)\
-            .press_func(self._short1)
+            .release_func(self._short1)
 
         Pushbutton(button_2.pin)\
             .press_func(self._short2)

@@ -62,7 +62,6 @@ class Sequencer:
     def __init__(self, clock: Clock, seq_len: int = 8):
         # Initialize instance variables
         self.clock = clock
-        self.clock.toggle_edit(False)  # Disable clock edit
         self.seq_len = seq_len
         self.pitch = [
             [0] * self.seq_len,
@@ -169,6 +168,8 @@ class Sequencer:
         self.edit = True
         self.counter = 0
         self.selected_output = 0
+        self.clock.toggle_edit(False)  # Disable clock edit
+
 
     async def start(self):
         # Register the button handlers and module state.
