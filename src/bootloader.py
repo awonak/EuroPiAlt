@@ -24,6 +24,7 @@ from scripts.sequencer import Sequencer
 from scripts.turing_machine import TuringMachine
 from scripts.smooth_random_voltages import SmoothRandomVoltages
 from scripts.euclidean_rhythm import EuclideanRhythm
+from scripts.coin_toss import CoinToss
 
 
 # Initialize a Clock for the sequencer.
@@ -42,6 +43,7 @@ scripts = [
     TuringMachine(clock),
     SmoothRandomVoltages(clock),
     EuclideanRhythm(clock),
+    CoinToss(clock),
 ]
 SCRIPT_COUNT = len(scripts)
 
@@ -72,6 +74,8 @@ async def main(script: any):
 
 
 def bootloader():
+    # Start a new event loop.
+    asyncio.new_event_loop()
 
     # Boot animation.
     loading_animation()

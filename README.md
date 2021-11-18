@@ -39,6 +39,7 @@ Once you have created and tested your script, you can add it to the bootloader s
 | ○○●●    | [Turing Machine](src/scripts/turring_machine.py)    | Play a sequence that changes notes within a scale according to the probability set by knob 2. |
 | ○●○○    | [Smooth Random Voltage](src/scripts/smooth_random_voltages.py)    | Random cv with adjustable slew rate. |
 | ○●○●    | [Euclidean Rhythms](src/scripts/euclidean_rhythm.py)    | Configurable number of steps and pulses distributed as evenly as possible. |
+| ○●●○    | [Coin Toss](src/scripts/coin_toss.py)    | Two pairs of clocked probability gates. |
 
 
 ## Transferring scripts using rshell
