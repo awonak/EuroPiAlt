@@ -15,6 +15,7 @@ the clock speed into audio rate.
 knob_1: master clock speed, rate of voltage change
 knob_2: probability threshold
 button_1: toggle speed normal/turbo
+button_2: toggle gate/trigger mode
 digital_1: Coin 1 gate on when voltage above threshold
 digital_2: Coin 2 gate on when voltage below threshold
 digital_3: Coin 2 gate on when voltage above threshold
@@ -27,14 +28,17 @@ from utime import ticks_ms
 
 from lib.clock import Clock
 from lib.clock import MAX_BPM
-from lib.europi import knob_1
+from lib.europi import DigitalOut, knob_1
 from lib.europi import knob_2
 from lib.europi import button_1
+from lib.europi import button_2
 from lib.europi import digital_1
 from lib.europi import digital_2
 from lib.europi import digital_3
 from lib.europi import digital_4
+from lib.helpers import trigger
 from lib.helpers import volts
+from lib.ui import digital_off
 
 
 DEBUG = False
@@ -47,39 +51,51 @@ class CoinToss:
 
     def __init__(self, clock: Clock):
         self.clock = clock
+        self.gate_mode = True
     
     def get_next_deadline(self):
         """Get the deadline for next clock tick whole note."""
         return ticks_ms() + (self.clock.wait_ms() * 4)
+    
+    def toss(self, a: DigitalOut, b: DigitalOut) -> float:
+        coin = random()
+        threshold = knob_2.percent()
+        if self.gate_mode:
+            a.value(coin > threshold)
+            b.value(coin < threshold)
+        else:
+            trigger(a if coin > threshold else b)
+        return coin
 
-    def debug(self, c1, c2, t):
+    def debug(self, c1, c2):
         if DEBUG:
             print("COIN1: {:>.2f}  COIN2: {:>.2f}  THRESH: {:>.2f}".format(
-                volts(c1), volts(c2), volts(t)))
+                volts(c1), volts(c2), volts(knob_2.percent())))
     
     async def start(self):
         # Register button handlers
         @button_1.handler
         def toggle_speed():
             self.clock.max_bpm ^= TOGGLE_SPEED
-            
+        
+        @button_2.handler
+        def toggle_gate():
+            self.gate_mode = not self.gate_mode
+            digital_off()
+        
         # Start the main loop.
         deadline = self.get_next_deadline()
-        coin1 = random()
+        coin1 = self.toss(digital_1, digital_2)
         while True:
+            # D1/2 pair coin toss on the whole note.
             if ticks_ms() > deadline:
-                coin1 = random()
                 deadline = self.get_next_deadline()
-                
-            coin2 = random()
-            threshold = knob_2.percent()
-            
-            digital_1.value(coin1 > threshold)
-            digital_2.value(coin1 < threshold)
-            digital_3.value(coin2 > threshold)
-            digital_4.value(coin2 < threshold)
+                coin1 = self.toss(digital_1, digital_2)
 
-            self.debug(coin1, coin2, threshold)
+            # D3/4 pair coin toss on the quarter note.
+            coin2 = self.toss(digital_3, digital_4)
+
+            self.debug(coin1, coin2)
             await asyncio.sleep_ms(self.clock.wait_ms())
 
 
