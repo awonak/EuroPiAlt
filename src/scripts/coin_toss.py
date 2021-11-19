@@ -1,7 +1,7 @@
 """
 Coin Toss
 author: awonak
-version: 1.1
+version: 1.0
 
 Two pairs of clocked probability gates.
 
@@ -11,7 +11,6 @@ Out 1 and 2 run at 1x speed and Digital 3 and 4 run at 4x speed for
 interesting rhythmic patterns. Push button 1 to toggle turbo mode which brings
 the clock speed into audio rate.
 
-
 knob_1: master clock speed, rate of voltage change
 knob_2: probability threshold
 button_1: toggle speed normal/turbo
@@ -20,6 +19,7 @@ digital_1: Coin 1 gate on when voltage above threshold
 digital_2: Coin 2 gate on when voltage below threshold
 digital_3: Coin 2 gate on when voltage above threshold
 digital_4: Coin 2 gate on when voltage below threshold
+
 """
 from random import random
 
@@ -28,7 +28,8 @@ from utime import ticks_ms
 
 from lib.clock import Clock
 from lib.clock import MAX_BPM
-from lib.europi import DigitalOut, knob_1
+from lib.europi import DigitalOut
+from lib.europi import knob_1
 from lib.europi import knob_2
 from lib.europi import button_1
 from lib.europi import button_2
