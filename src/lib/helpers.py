@@ -18,7 +18,7 @@ def random_chance(percentage: float) -> bool:
 def randint16() -> int:
     return randint(0, UINT_16)
 
-def volts(percentage: float) -> float:
+def percent_to_volts(percentage: float) -> float:
     """Converts a float between 0 and 1 into an equivalent 3.3v value."""
     if percentage > 1:
         raise ValueError("volts expects a percentage between 0 and 1.")

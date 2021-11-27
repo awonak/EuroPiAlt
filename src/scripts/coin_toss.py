@@ -38,7 +38,7 @@ from lib.europi import digital_2
 from lib.europi import digital_3
 from lib.europi import digital_4
 from lib.helpers import trigger
-from lib.helpers import volts
+from lib.helpers import percent_to_volts as v
 from lib.ui import digital_off
 
 
@@ -71,7 +71,7 @@ class CoinToss:
     def debug(self, c1, c2):
         if DEBUG:
             print("COIN1: {:>.2f}  COIN2: {:>.2f}  THRESH: {:>.2f}".format(
-                volts(c1), volts(c2), volts(knob_2.percent())))
+                v(c1), v(c2), v(knob_2.percent())))
     
     async def start(self):
         # Register button handlers
@@ -88,12 +88,12 @@ class CoinToss:
         deadline = self.get_next_deadline()
         coin1 = self.toss(digital_1, digital_2)
         while True:
-            # D1/2 pair coin toss on the whole note.
+            # D1/2 pair coin toss on the whole note. (1x speed)
             if ticks_ms() > deadline:
                 deadline = self.get_next_deadline()
                 coin1 = self.toss(digital_1, digital_2)
 
-            # D3/4 pair coin toss on the quarter note.
+            # D3/4 pair coin toss on the quarter note. (4x speed)
             coin2 = self.toss(digital_3, digital_4)
 
             self.debug(coin1, coin2)
