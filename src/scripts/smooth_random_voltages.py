@@ -108,7 +108,7 @@ class SmoothRandomVoltages:
             
             # Target voltage reached
             elif self.voltage == self.next_voltage:
-                digital_2.value(1)  # Gate on slew reached target volatge
+                digital_2.value(1)  # Gate on slew reached target voltage
 
             # Set the current smooth / stepped voltage.
             analog_1.value(self.voltage)

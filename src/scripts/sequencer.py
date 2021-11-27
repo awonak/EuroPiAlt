@@ -48,7 +48,7 @@ from lib.helpers import trigger
 from lib.scales import chromatic_scale
 
 
-DEBUG = True
+DEBUG = False
 
 
 class Sequencer:
