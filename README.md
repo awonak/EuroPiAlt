@@ -2,7 +2,10 @@
 
 Alternate firmware for EuroPi Prototype designed with reusable components and a bootloader for switching scripts loaded onto the module.
 
+Links to original firmware and official website:
+
 https://github.com/roryjamesallen/EuroPi-Prototype
+
 https://allensynthesis.co.uk/
 
 ## Firmware
@@ -31,6 +34,8 @@ class MyScript:
 ```
 
 Once you have created and tested your script, you can add it to the bootloader script list [here](src/bootloader.py#L36).
+
+The 4 digital LEDs are used to show the list of scripts available. 
 
 ### Scripts
 
