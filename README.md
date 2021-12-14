@@ -1,6 +1,9 @@
 # EuroPiAlt
 
-Alternate firmware for EuroPi designed with reusable components and a bootloader for switching scripts loaded onto the module.
+Alternate firmware for EuroPi Prototype designed with reusable components and a bootloader for switching scripts loaded onto the module.
+
+https://github.com/roryjamesallen/EuroPi-Prototype
+https://allensynthesis.co.uk/
 
 ## Firmware
 
