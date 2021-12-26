@@ -137,6 +137,7 @@ class Sequencer:
 
     def next_step(self):
         self.counter = (self.counter + 1) % self.seq_len
+        self.play_step()
         # In edit mode blink d1 to show editing position.
         if self.edit:
             if self.counter == 0:
@@ -180,7 +181,6 @@ class Sequencer:
         while True:
             # Play sequence
             if self.run:
-                self.play_step()
                 self.next_step()
             # Edit sequence
             elif self.edit:
