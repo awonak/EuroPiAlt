@@ -1,7 +1,7 @@
 """
 Sequencer
 author: awonak
-version: 3.0
+version: 3.1
 
 4 channels sequencer with 8 programmable steps of quantized pitch.
 
@@ -21,16 +21,18 @@ analog_4: pattern 4 output
 digital_1: step trigger
 digital_2: (state display) step change
 digital_3: (state display) note value change
-digital_4: (state display) output change
+digital_4: (state display) editing pattern output change
 
 Play Mode:
 knob_1: master tempo
 button_1: play/pause / change to Edit mode
+button_2: reset sequence
 analog_1: pattern 1 output
 analog_2: pattern 2 output
 analog_3: pattern 3 output
 analog_4: pattern 4 output
 digital_1: step trigger
+digital_3: reset trigger
 
 """
 import uasyncio as asyncio
@@ -82,6 +84,8 @@ class Sequencer:
     def _short2(self):
         if self.edit:
             self.next_step()
+        else:
+            self.reset_sequence()
 
     def _long2(self):
         if self.edit:
@@ -107,13 +111,18 @@ class Sequencer:
             self.edit = True
             self.run = False
             self.counter = 0
+    
+    def reset_sequence(self):
+        """Restart the sequence back to the start and trigger reset."""
+        self.counter = 0
+        trigger(digital_outputs[2])
 
     def get_pitch(self) -> int:
         """Get the pitch cv value for the given knob position."""
-        # TODO: allow user selected scales
-        p = knob_1.choice(13)
-        o = knob_2.choice(3) * 12
-        return chromatic_scale[p + o]
+        # TODO: allow user selected scales.
+        pitch = knob_1.choice(13)
+        octave = knob_2.choice(3) * 12
+        return chromatic_scale[pitch + octave]
 
     def adjust_step(self):
         """Set the pitch for the current output."""
@@ -122,16 +131,14 @@ class Sequencer:
             self.pitch[self.selected_output][self.counter] = pitch
             self._previous_pitch = pitch
             self.play_step()
-            trigger(digital_outputs[2])
-
 
     def play_step(self):
-        # Play pitch/velocity
+        # Play pitch cv for each output.
         analog_outputs[0].value(self.pitch[0][self.counter])
         analog_outputs[1].value(self.pitch[1][self.counter])
         analog_outputs[2].value(self.pitch[2][self.counter])
         analog_outputs[3].value(self.pitch[3][self.counter])
-        # Trigger digital 1
+        # Trigger digital 1 on each step
         trigger(digital_outputs[0])
         self.debug()
 
